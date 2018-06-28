@@ -61,6 +61,7 @@ set linebreak
 set wildmenu
 set confirm
 set visualbell
+set autoread
 
 set relativenumber
 set number

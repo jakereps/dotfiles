@@ -1,113 +1,114 @@
+
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-
+" set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'vim-airline/vim-airline'
-Plugin 'dempfi/vim-airline-neka'
+Plugin 'dracula/vim'
+Plugin 'fatih/vim-go'
 Plugin 'scrooloose/nerdtree'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-commentary'
+Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
-Plugin 'Yggdroot/indentLine'
-Plugin 'ayu-theme/ayu-vim'
-Plugin 'prabirshrestha/async.vim'
-Plugin 'prabirshrestha/vim-lsp'
-Plugin 'prabirshrestha/asyncomplete.vim'
-Plugin 'prabirshrestha/asyncomplete-lsp.vim'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'neoclide/coc.nvim'
+Plugin 'rust-lang/rust.vim'
 
+" All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 
-if executable('pyls')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'pyls',
-        \ 'cmd': {server_info->['pyls']},
-        \ 'whitelist': ['python'],
-        \ })
-endif
-
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
-
-let g:asyncomplete_auto_popup = 0
-
-function! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~ '\s'
-endfunction
-
-inoremap <silent><expr> <TAB>
-  \ pumvisible() ? "\<C-n>" :
-  \ <SID>check_back_space() ? "\<TAB>" :
-  \ asyncomplete#force_refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+let mapleader = ","
 
 autocmd vimenter * NERDTree
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 map <C-n> :NERDTreeToggle<CR>
-
-" IndentLine {{
-let g:indentLine_showFirstIndentLevel = 1
-let g:indentLine_setColors = 0
-" }}
-
-" NERDTree {{
 let NERDTreeMinimalUI = 1
-"}}
+let NERDTreeDirArrows = 1
 
-" Airline {{
-let g:airline#extensions#tabline#enabled = 1
-let g:airline_powerline_fonts = 1
-let g:airline_theme = 'powerlineish'
-set laststatus=2
-set ttimeoutlen=50
-set noshowmode
-let g:airline#extensions#branch#enabled=1
-" }}
-
-set fillchars=""
 set termguicolors
-let ayucolor="mirage"
-colorscheme ayu
+let g:dracula_italic = 0
+colorscheme dracula
+highlight Normal ctermbg=None
 
-set foldlevel=20
-set linebreak
-set wildmenu
-set confirm
-set visualbell
-set autoread
+
+set undodir=$HOME/.vimundo
+set undofile
+
+set nobackup
+set noswapfile
+
+set tabstop=4
+set softtabstop=0
+set shiftwidth=4
+set expandtab
 
 set relativenumber
 set number
-set showmatch
 
-set termguicolors
-let ayucolor="mirage"
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
 
-colorscheme ayu
-syntax on
+" Automatically resize screens to be equally the same
+autocmd VimResized * wincmd =
 
-set noswapfile
-set backspace=2
+augroup go
+	autocmd!
 
-set shiftwidth=2
-set softtabstop=2
-set tabstop=2
-set expandtab
+	autocmd FileType go nmap <silent> <Leader>b <Plug>(go-build)
+	autocmd FileType go nmap <silent> <Leader>e <Plug>(go-iferr)
+	autocmd FileType go nmap <silent> <Leader>i <Plug>(go-imports)
+	autocmd FileType go nmap <silent> <Leader>t <Plug>(go-test)
+augroup END
 
-" Removes trailing spaces
-function TrimWhiteSpace()
-  %s/\s*$//
-  ''
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-set list listchars=trail:.,extends:>
-autocmd FileWritePre * call TrimWhiteSpace()
-autocmd FileAppendPre * call TrimWhiteSpace()
-autocmd FilterWritePre * call TrimWhiteSpace()
-autocmd BufWritePre * call TrimWhiteSpace()
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+
+" Use U to show documentation in preview window
+nnoremap <silent> U :call <SID>show_documentation()<CR>
+
+nmap <leader>rn <Plug>(coc-rename)
+
+" if hidden is not set, TextEdit might fail.
+set hidden
+" Smaller updatetime for CursorHold & CursorHoldI
+set updatetime=300
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+" always show signcolumns
+set signcolumn=yes
+
+" Remap keys for gotos
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+cnoreabbrev W! w!
+cnoreabbrev Q! q!
+cnoreabbrev Qall! qall!
+cnoreabbrev Wq wq
+cnoreabbrev Wa wa
+cnoreabbrev wQ wq
+cnoreabbrev WQ wq
+cnoreabbrev W w
+cnoreabbrev Q q
+cnoreabbrev Qall qall
+cnoreabbrev Noh noh

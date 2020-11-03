@@ -8,14 +8,16 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'dracula/vim'
-Plugin 'fatih/vim-go'
+" Plugin 'fatih/vim-go'
 Plugin 'scrooloose/nerdtree'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-sensible'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'neoclide/coc.nvim'
 Plugin 'rust-lang/rust.vim'
+Plugin 'mileszs/ack.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -30,10 +32,12 @@ let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
 
 set termguicolors
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
 let g:dracula_italic = 0
 colorscheme dracula
 highlight Normal ctermbg=None
-
 
 set undodir=$HOME/.vimundo
 set undofile
@@ -49,9 +53,6 @@ set expandtab
 set relativenumber
 set number
 
-let g:go_def_mode='gopls'
-let g:go_info_mode='gopls'
-
 " Automatically resize screens to be equally the same
 autocmd VimResized * wincmd =
 
@@ -63,6 +64,14 @@ augroup go
 	autocmd FileType go nmap <silent> <Leader>i <Plug>(go-imports)
 	autocmd FileType go nmap <silent> <Leader>t <Plug>(go-test)
 augroup END
+
+augroup yaml
+    autocmd!
+
+    autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+augroup END
+
+
 
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
@@ -77,8 +86,7 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>" 
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
 
 " Use U to show documentation in preview window
@@ -94,6 +102,13 @@ set updatetime=300
 set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
+
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
+
+cnoreabbrev Ack Ack!
+nnoremap <Leader>a :Ack!<Space>
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
